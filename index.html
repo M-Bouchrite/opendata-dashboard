@@ -1,16 +1,25 @@
-<!-- Shows the main heading of the page. -->
+<!-- Main heading for the dashboard. -->
 <h1>Datasets</h1>
 
-<!-- Labels the list as example data. -->
-<p>Sample datasets</p>
+<!-- Tell the user that these are examples. -->
+<p>Choose a sample dataset to see its description.</p>
 
-<!-- Starts a bullet list. -->
+<!-- Group the datasets into a bullet list. -->
 <ul>
-  <!-- Adds the first bullet. -->
-  <li>Parking locations</li>
-
-  <!-- Adds the second bullet. -->
-  <li>Weather stations</li>
-
-<!-- Ends the bullet list. -->
+  <li>
+    <!-- Details can open and close when the user clicks the dataset name. -->
+    <details>
+      <!-- The summary is the clickable dataset name. -->
+      <summary>Parking locations</summary>
+      <!-- This paragraph appears when the user opens the item. -->
+      <p>Example dataset about where parking facilities are located.</p>
+    </details>
+  </li>
+  <li>
+    <!-- The second dataset uses the same structure. -->
+    <details>
+      <summary>Weather stations</summary>
+      <p>Example dataset about where weather stations are located.</p>
+    </details>
+  </li>
 </ul>
