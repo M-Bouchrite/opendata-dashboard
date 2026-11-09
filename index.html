@@ -1,55 +1,24 @@
-<h1>Datasets</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dataset Dashboard</title>
+</head>
+<body>
+  <h1>Datasets</h1>
 
-<!-- Show loading, empty-list or error messages. -->
-<p id="message">Loading datasets...</p>
+  <p id="message">Loading datasets...</p>
+  <ul id="datasets"></ul>
 
-<!-- JavaScript will add the dataset names here. -->
-<ul id="datasets"></ul>
+  <!-- Load the shared function. -->
+  <script src="dashboard.js"></script>
 
-<script>
-  // Find the two HTML elements we need.
-  const message = document.getElementById("message");
-  const list = document.getElementById("datasets");
+  <!-- Run it using this page's elements. -->
+  <script>
+    const list = document.getElementById("datasets");
+    const message = document.getElementById("message");
 
-  async function loadDatasets() {
-    try {
-      // Request the dataset catalogue from Open Data Hub.
-      const response = await fetch(
-        "https://tourism.api.opendatahub.com/v1/MetaData?pagesize=1000"
-      );
-
-      // Treat an unsuccessful response as an error.
-      if (!response.ok) {
-        throw new Error("Request failed");
-      }
-
-      // Convert the response from JSON into JavaScript data.
-      const data = await response.json();
-
-      if (!Array.isArray(data.Items)) {
-        throw new Error("Unexpected response");
-      }
-
-      // Display a message if there are no datasets.
-      if (data.Items.length === 0) {
-        message.textContent = "No datasets available.";
-        return;
-      }
-
-      // Add each dataset name to the list.
-      for (const dataset of data.Items) {
-        const item = document.createElement("li");
-        item.textContent = dataset.Shortname || dataset.Id;
-        list.appendChild(item);
-      }
-
-      // Remove the loading message.
-      message.textContent = "";
-    } catch (error) {
-      message.textContent = "Could not load datasets. Please try again later.";
-    }
-  }
-
-  // Load the list when the page opens.
-  loadDatasets();
-</script>
+    loadDatasets(list, message);
+  </script>
+</body>
+</html>
