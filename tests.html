@@ -1,0 +1,172 @@
+<!-- Use standard HTML mode in the browser. -->
+<!DOCTYPE html>
+
+<!-- The page language is English. -->
+<html lang="en">
+<head>
+  <!-- Allow characters such as accents to display correctly. -->
+  <meta charset="UTF-8">
+
+  <!-- This title appears in the browser tab. -->
+  <title>Dashboard Tests</title>
+</head>
+
+<body>
+  <h1>Dashboard Tests</h1>
+  <p>Reload this page to run the tests again.</p>
+
+  <!-- Each test will add a PASS or FAIL result to this list. -->
+  <ul id="results"></ul>
+
+  <!-- Load the SAME function used by the real dashboard.
+       This means we test the actual application function. -->
+  <script src="dashboard.js"></script>
+
+  <script>
+    // Find the HTML list where we will display test results.
+    const results = document.getElementById("results");
+
+    // Create separate elements for each test.
+    // They are not added to the visible page.
+    // This keeps one test from affecting another test.
+    function createElements() {
+      return {
+        list: document.createElement("ul"),
+        message: document.createElement("p")
+      };
+    }
+
+    // Check whether an expected condition is true.
+    // If it is false, throw an error with an explanation.
+    function check(condition, explanation) {
+      if (!condition) {
+        throw new Error(explanation);
+      }
+    }
+
+    // Run one test.
+    // "name" describes the test.
+    // "action" is the function containing its checks.
+    async function test(name, action) {
+      const result = document.createElement("li");
+
+      try {
+        // Wait until the test finishes.
+        // A failed check will jump to the catch block.
+        await action();
+
+        result.textContent = "PASS: " + name;
+        result.style.color = "green";
+      } catch (error) {
+        // Show which test failed and why.
+        result.textContent =
+          "FAIL: " + name + " - " + error.message;
+        result.style.color = "red";
+      }
+
+      // Add the result to the visible page.
+      results.appendChild(result);
+    }
+
+    async function runTests() {
+      // TEST 1: A successful response contains two datasets.
+      await test("Dataset names appear", async () => {
+        // Get fresh elements for this test.
+        const { list, message } = createElements();
+
+        // Replace the real API request with a simulated response.
+        // No internet connection is needed for this test.
+        const request = async () => ({
+          ok: true,
+          json: async () => ({
+            Items: [
+              { Id: "1", Shortname: "Museums" },
+              { Id: "2", Shortname: "Weather stations" }
+            ]
+          })
+        });
+
+        // Run the real function with our simulated request.
+        await loadDatasets(list, message, request);
+
+        // Check the number of displayed datasets.
+        check(
+          list.children.length === 2,
+          "Expected two datasets."
+        );
+
+        // Check both names and their order.
+        check(
+          list.children[0].textContent === "Museums",
+          "First dataset name is incorrect."
+        );
+
+        check(
+          list.children[1].textContent === "Weather stations",
+          "Second dataset name is incorrect."
+        );
+
+        // After success, the loading message should disappear.
+        check(
+          message.textContent === "",
+          "Loading message should disappear."
+        );
+      });
+
+      // TEST 2: The request succeeds but contains zero datasets.
+      await test("Empty list shows a message", async () => {
+        const { list, message } = createElements();
+
+        // Items: [] means an empty dataset list.
+        const request = async () => ({
+          ok: true,
+          json: async () => ({ Items: [] })
+        });
+
+        await loadDatasets(list, message, request);
+
+        // No dataset names should be displayed.
+        check(
+          list.children.length === 0,
+          "The list should be empty."
+        );
+
+        // Check the exact message shown to the user.
+        check(
+          message.textContent === "No datasets available.",
+          "Empty-list message is incorrect."
+        );
+      });
+
+      // TEST 3: The request fails, like a connection failure.
+      await test("Failed request shows an error", async () => {
+        const { list, message } = createElements();
+
+        // Throwing an error simulates a failed request.
+        const request = async () => {
+          throw new Error("Simulated connection failure");
+        };
+
+        await loadDatasets(list, message, request);
+
+        // A failed request should not display dataset names.
+        check(
+          list.children.length === 0,
+          "The list should be empty."
+        );
+
+        // Check that the function displays the expected error.
+        check(
+          message.textContent ===
+            "Could not load datasets. Please try again later.",
+          "Error message is incorrect."
+        );
+      });
+    }
+
+    // Start all three tests when this page opens.
+    // The await statements above run them one after another.
+    runTests();
+  </script>
+</body>
+</html>
