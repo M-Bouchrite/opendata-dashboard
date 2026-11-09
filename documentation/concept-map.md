@@ -11,3 +11,17 @@
 1. The dashboard gets the list of available datasets from the catalog.
 2. The user selects a dataset from the list.
 3. The dashboard asks the statistics component for that dataset’s record count and displays the result.
+
+
+## Bounded contexts
+
+### Dataset Catalog
+Manages the list of datasets, their names and IDs.
+
+### Dataset Statistics
+Uses a dataset ID to get or calculate its record count.
+
+### Dashboard (presentation layer)
+Shows the dataset list and record count.
+Lets the user choose a dataset.
+Uses the two contexts above.
