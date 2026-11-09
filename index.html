@@ -1,25 +1,55 @@
-<!-- Main heading for the dashboard. -->
 <h1>Datasets</h1>
 
-<!-- Tell the user that these are examples. -->
-<p>Choose a sample dataset to see its description.</p>
+<!-- Show loading, empty-list or error messages. -->
+<p id="message">Loading datasets...</p>
 
-<!-- Group the datasets into a bullet list. -->
-<ul>
-  <li>
-    <!-- Details can open and close when the user clicks the dataset name. -->
-    <details>
-      <!-- The summary is the clickable dataset name. -->
-      <summary>Parking locations</summary>
-      <!-- This paragraph appears when the user opens the item. -->
-      <p>Example dataset about where parking facilities are located.</p>
-    </details>
-  </li>
-  <li>
-    <!-- The second dataset uses the same structure. -->
-    <details>
-      <summary>Weather stations</summary>
-      <p>Example dataset about where weather stations are located.</p>
-    </details>
-  </li>
-</ul>
+<!-- JavaScript will add the dataset names here. -->
+<ul id="datasets"></ul>
+
+<script>
+  // Find the two HTML elements we need.
+  const message = document.getElementById("message");
+  const list = document.getElementById("datasets");
+
+  async function loadDatasets() {
+    try {
+      // Request the dataset catalogue from Open Data Hub.
+      const response = await fetch(
+        "https://tourism.api.opendatahub.com/v1/MetaData?pagesize=1000"
+      );
+
+      // Treat an unsuccessful response as an error.
+      if (!response.ok) {
+        throw new Error("Request failed");
+      }
+
+      // Convert the response from JSON into JavaScript data.
+      const data = await response.json();
+
+      if (!Array.isArray(data.Items)) {
+        throw new Error("Unexpected response");
+      }
+
+      // Display a message if there are no datasets.
+      if (data.Items.length === 0) {
+        message.textContent = "No datasets available.";
+        return;
+      }
+
+      // Add each dataset name to the list.
+      for (const dataset of data.Items) {
+        const item = document.createElement("li");
+        item.textContent = dataset.Shortname || dataset.Id;
+        list.appendChild(item);
+      }
+
+      // Remove the loading message.
+      message.textContent = "";
+    } catch (error) {
+      message.textContent = "Could not load datasets. Please try again later.";
+    }
+  }
+
+  // Load the list when the page opens.
+  loadDatasets();
+</script>
